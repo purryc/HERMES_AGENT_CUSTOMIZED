@@ -1,0 +1,19 @@
+version: "3.9"
+
+services:
+  personal-agent-api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "8787:8787"
+    environment:
+      OPENROUTER_API_KEY: "${OPENROUTER_API_KEY:-}"
+      WECOM_TOKEN: "${WECOM_TOKEN:-}"
+      WECOM_ENCODING_AES_KEY: "${WECOM_ENCODING_AES_KEY:-}"
+      WECOM_CORP_ID: "${WECOM_CORP_ID:-}"
+      WECOM_AGENT_ID: "${WECOM_AGENT_ID:-}"
+    volumes:
+      - ./data:/app/data
+      - ./config:/app/config
+    restart: unless-stopped

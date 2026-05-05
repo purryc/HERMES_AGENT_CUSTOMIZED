@@ -1,0 +1,80 @@
+{
+  "agent_name": "Hermes Personal Work Agent",
+  "data_dir": "F:/AGENT/data",
+  "storage": {
+    "backend": "sqlite"
+  },
+  "server": {
+    "host": "127.0.0.1",
+    "port": 8787
+  },
+  "model_router": {
+    "primary": {
+      "provider": "openrouter",
+      "model": "openai/gpt-4.1-mini",
+      "base_url": "https://openrouter.ai/api/v1/chat/completions",
+      "api_key_env": "OPENROUTER_API_KEY",
+      "timeout_seconds": 45
+    },
+    "auxiliary": {
+      "provider": "openrouter",
+      "model": "openai/gpt-4.1-mini",
+      "base_url": "https://openrouter.ai/api/v1/chat/completions",
+      "api_key_env": "OPENROUTER_API_KEY",
+      "timeout_seconds": 30
+    },
+    "vision": {
+      "provider": "openrouter",
+      "model": "openai/gpt-4.1-mini",
+      "base_url": "https://openrouter.ai/api/v1/chat/completions",
+      "api_key_env": "OPENROUTER_API_KEY",
+      "timeout_seconds": 60
+    }
+  },
+  "approvals": {
+    "high_risk_actions": [
+      "file_write",
+      "browser_automation",
+      "external_send"
+    ]
+  },
+  "wecom": {
+    "token_env": "WECOM_TOKEN",
+    "encoding_aes_key_env": "WECOM_ENCODING_AES_KEY",
+    "corp_id_env": "WECOM_CORP_ID",
+    "agent_id_env": "WECOM_AGENT_ID"
+  },
+  "voice": {
+    "api_key_env": "OPENROUTER_API_KEY",
+    "api_base_url": "https://openrouter.ai/api/v1",
+    "transcription_model": "openai/gpt-audio",
+    "transcription_language": "zh",
+    "tts_model": "openai/gpt-4o-mini-tts-2025-12-15",
+    "tts_voice": "alloy",
+    "tts_instructions": "Speak warmly in concise Mandarin Chinese.",
+    "tts_device_voice": "nova",
+    "tts_device_instructions": "Speak in standard Mainland Mandarin Chinese with very clear pronunciation. Use short phrases, slow pace, and natural pauses. Avoid English accent, avoid code-switching, and do not sound rushed.",
+    "tts_speed": 1.2,
+    "tts_output_sample_rate": 24000,
+    "max_context_turns": 6,
+    "audio_ttl_seconds": 900,
+    "cleanup_interval_seconds": 60
+  },
+  "main_brain": {
+    "enabled": false,
+    "base_url": "https://your-telegram-hermes.example",
+    "auth_env": "MAIN_BRAIN_AUTH_TOKEN",
+    "auth_header_name": "Authorization",
+    "owner_id": "you",
+    "telegram_chat_id": "",
+    "timeout_seconds": 15
+  },
+  "messaging": {
+    "channels": [
+      "wechat",
+      "wecom",
+      "terminal",
+      "companion"
+    ]
+  }
+}
