@@ -19,6 +19,19 @@ WSL path: `/mnt/f/AGENT/memory/SHARED_AGENT_MEMORY.md`
 - Design background, not primarily technical; prefers clear recommendations, concise tradeoff tables, and then practical implementation.
 - Uses Windows with WSL Ubuntu-24.04.
 - Wants Hermes as the always-on Telegram companion and Codex as the execution layer for code, files, tests, and local automation.
+- Prefers low-friction practical setups over over-engineered security workflows; private GitHub sync without encryption is acceptable for now, but secrets must still be excluded.
+- Gets frustrated when shell commands block on interactive prompts; prefer non-interactive commands and explain exactly what is happening.
+- Wants assistants to be proactive and decisive: inspect the local state, implement the recommended path, verify it, and only ask when a choice has real risk.
+- Likes Chinese explanations with concrete commands and clear operational routines.
+- Long-term themes include financial independence, family planning, creator/brand work, high design quality, and cross-device workflow across Windows/Mac/iPad.
+
+## User Communication Preferences
+
+- Be concise but not vague; user appreciates a direct diagnosis followed by the command or fix.
+- Do not make the user choose inside shell prompts they cannot control. If selection is needed, use a safe default or stop before the interactive step.
+- For repeated workflows, create scripts or desktop/task shortcuts instead of asking the user to remember long command chains.
+- For sensitive automation, explain what is synced and what is intentionally excluded.
+- Avoid pretending sync means "everything"; distinguish curated shared memory, raw local memory, skills, auth, and secrets.
 
 ## Active Agent Stack
 
@@ -30,18 +43,40 @@ WSL path: `/mnt/f/AGENT/memory/SHARED_AGENT_MEMORY.md`
 - Codex CLI is installed in WSL and can be called with `codex exec`.
 - WSL Codex root auth is bridged from Windows Codex ChatGPT auth so Hermes can call `codex exec` from terminal tools without hitting OpenAI 401 errors.
 - Work Mac Codex can join this memory bridge by running `scripts/install-mac-codex-memory-sync.sh` from a synced copy of this folder.
+- Telegram bot integration is the working personal-message gateway after personal WeChat was blocked/unavailable.
+- Personal WeChat integration was not viable in the attempted path; Enterprise WeChat was not available to the user.
+- Dashboard desktop shortcut exists on Windows and uses an AI-assistant style icon.
+- Dashboard update previously failed when Hermes install was not detected as a Git repository; reinstall/update path should account for that.
 
 ## Model Routing Policy
 
 - Hermes/OpenRouter handles Telegram intake, everyday chat, reminders, memory, light planning, and coordination.
 - Codex handles implementation: repositories, scripts, file edits, tests, desktop/web execution, and batch engineering work.
 - For engineering tasks, Hermes should summarize the requested change and then delegate execution to Codex instead of spending OpenRouter budget on implementation.
+- ChatGPT/Codex subscription and OpenRouter API billing are separate; do not assume ChatGPT plan credit pays OpenRouter usage.
+- Hermes default model target is low-cost OpenRouter routing. Current preferred main model is `deepseek/deepseek-v4-flash`.
+- Auxiliary preferred routing: vision/web extraction/compression through Gemini Flash Lite class models, tiny title/search through `gpt-5-nano`, memory reflection through `anthropic/claude-haiku-4.5`, curator through DeepSeek Pro class models.
+- Strong models like Claude Sonnet or Grok should be temporary manual switches for high-value tasks, not always-on defaults.
 
 ## Active Projects
 
 - Hermes Agent setup and Dashboard companion work in `F:\AGENT`.
 - Dividend Dashboard work is expected under `F:\MyFinanceTool`.
 - Knowledge management system uses local Markdown/structured data plus Google Drive/iPad app retrieval.
+- Dividend Dashboard current target includes stock/dividend analysis, spending analysis, and scheduling/automation support.
+- Local shared memory and skill sync repo is `https://github.com/purryc/hermes-memory`; it is private and used as the three-endpoint bridge.
+
+## Important Local Paths
+
+- Windows workspace: `F:\AGENT`
+- GitHub sync mirror: `F:\AGENT\.memory-git`
+- Shared memory: `F:\AGENT\memory\SHARED_AGENT_MEMORY.md`
+- Local-only Hermes raw export: `F:\AGENT\memory\hermes-raw-memory-export.md`
+- Windows Codex skills: `C:\Users\User\.codex\skills`
+- Hermes shared skills target: `/root/.hermes/skills/shared`
+- Hermes built-in memories: `/root/.hermes/memories/USER.md` and `/root/.hermes/memories/MEMORY.md`
+- Hermes agent repo: `/root/.hermes/hermes-agent`
+- Dashboard URL: `http://127.0.0.1:9119`
 
 ## Handoff Notes
 
@@ -49,6 +84,20 @@ WSL path: `/mnt/f/AGENT/memory/SHARED_AGENT_MEMORY.md`
 - Before Hermes delegates to Codex, include relevant user intent, target path, safety constraints, and whether file changes are allowed.
 - After Codex completes work that changes long-term context, update this file or tell Hermes what should be saved.
 - If Hermes reports `Codex cannot connect to OpenAI API (401 Unauthorized)`, rerun `F:\AGENT\scripts\sync-codex-auth-to-wsl.ps1` and test with `codex exec`.
+- If Hermes says Codex is unavailable with OpenAI 401, prefer fixing auth bridge instead of letting OpenRouter model do a large coding job directly.
+- If Hermes blocks on project startup, inspect whether it is in WSL vs Windows path and whether dependencies were installed in the right environment.
+- If the task involves GitHub memory sync, use the `.memory-git` mirror and the allowlist scripts, not the noisy `F:\AGENT` worktree.
+
+## Operating Routines
+
+- Windows manual safe sync to GitHub: `powershell -NoProfile -ExecutionPolicy Bypass -File F:\AGENT\scripts\sync-windows-to-github.ps1 -ExportHermesRaw`
+- Windows pull from GitHub: `powershell -NoProfile -ExecutionPolicy Bypass -File F:\AGENT\scripts\pull-memory-github.ps1`
+- Windows install shared skills: `powershell -NoProfile -ExecutionPolicy Bypass -File F:\AGENT\scripts\install-shared-skills.ps1`
+- Mac start-of-day sync: `./scripts/sync-mac-from-github.sh`
+- Mac end-of-day sync: `./scripts/sync-mac-to-github.sh`
+- Mac first clone: `git clone https://github.com/purryc/hermes-memory.git && cd hermes-memory && chmod +x scripts/*.sh`
+- Daily Windows GitHub sync task: `HermesGitHubMemoryDailySync`, scheduled at 23:55 local time.
+- Local Hermes raw memory export task: `HermesCodexMemorySync`, every 30 minutes.
 
 ## Hermes Side: Skills And Tools
 
@@ -72,6 +121,17 @@ On Hermes side, the shared bridge works like this:
 - Built-in memory remains always active at `/root/.hermes/memories/USER.md` and `/root/.hermes/memories/MEMORY.md`.
 - The Windows scheduled task `HermesCodexMemorySync` exports those built-in files to `memory/hermes-raw-memory-export.md` every 30 minutes.
 - If an external Hermes memory provider is enabled later, update `scripts/sync-agent-memory.ps1` to export that provider too.
+- Checked on 2026-05-05: shared memory was too sparse; expanded this file with durable operational context so GitHub sync is more useful.
+
+## Memory Sync Boundaries
+
+- `memory/SHARED_AGENT_MEMORY.md` is the curated memory that should go to GitHub and be read by Codex/Hermes/Mac Codex.
+- `memory/hermes-raw-memory-export.md` is local-only and can contain sensitive private context.
+- `memory/mac-codex-memory.md` is the Mac-side curated/sanitized export target that may go to GitHub.
+- `skills/shared/*` are cross-agent skills that should go to GitHub.
+- `skills/mac-codex/*` stores Mac Codex custom skill snapshots after Mac runs its end-of-day sync.
+- Never sync `auth.json`, `.env`, provider configs with keys, bot tokens, private keys, recovery codes, or one-time login codes.
+- If user asks for "all memory", clarify whether they mean curated shared memory, raw local export, or searchable long-term memory provider.
 
 ## Mac Codex Sync Plan
 
