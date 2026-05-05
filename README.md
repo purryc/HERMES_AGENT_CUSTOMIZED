@@ -1,5 +1,7 @@
 # Hermes Personal Work Agent Starter
 
+Remote access quick path: [Vercel Remote Dashboard MVP](F:/AGENT/docs/vercel-remote-dashboard.md)
+
 这是一个围绕 `Hermes Agent` 使用场景搭出来的个人工作代理 starter project。
 它不试图替代 Hermes 本体，而是先把你这条路线里最关键的控制层落下来：
 

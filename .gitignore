@@ -5,6 +5,13 @@ __pycache__/
 .pytest_cache/
 .coverage
 .venv/
+node_modules/
+**/node_modules/
+dist/
+**/dist/
+*.tsbuildinfo
+.vercel/
+**/.vercel/
 .pio/
 **/.pio/
 data/
