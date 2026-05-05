@@ -51,6 +51,7 @@ specs/003-vercel-remote-dashboard/
 
 ```text
 remote-dashboard/
+|-- api/hermes.ts
 |-- api/hermes/[...path].ts
 |-- src/App.tsx
 |-- src/main.tsx

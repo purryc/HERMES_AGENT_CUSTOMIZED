@@ -21,7 +21,7 @@ Local ignored JSON written under `data/hermes-remote-tunnel.json`.
 
 ## ProxyRequest
 
-- `path`: Hermes API path after `/api/hermes/`.
+- `path`: Hermes API path supplied as the `/api/hermes?path=` query parameter.
 - `method`: HTTP method.
 - `token`: Browser-supplied `X-Remote-Dashboard-Token` or bearer token.
 - `body`: JSON payload for companion text turns or job operations.

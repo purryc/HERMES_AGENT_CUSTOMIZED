@@ -5,7 +5,7 @@
 All remote Hermes calls go through:
 
 ```text
-/api/hermes/<hermes-path>
+/api/hermes?path=<url-encoded-hermes-path>
 ```
 
 Required header:
@@ -20,7 +20,7 @@ Bearer auth is also accepted:
 Authorization: Bearer <REMOTE_DASHBOARD_TOKEN>
 ```
 
-### GET `/api/hermes/healthz`
+### GET `/api/hermes?path=%2Fhealthz`
 
 Returns local Hermes health response.
 
@@ -30,7 +30,7 @@ Expected success:
 { "ok": true }
 ```
 
-### POST `/api/hermes/api/companion/text-turns`
+### POST `/api/hermes?path=%2Fapi%2Fcompanion%2Ftext-turns`
 
 Request:
 

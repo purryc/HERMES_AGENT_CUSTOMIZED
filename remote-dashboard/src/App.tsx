@@ -18,7 +18,8 @@ const DEFAULT_DEVICE_ID = "m5stick-s3-pet-01";
 const DEFAULT_SESSION_ID = "main-session";
 
 async function callHermes(path: string, token: string, init: RequestInit = {}): Promise<HermesResult> {
-  const response = await fetch(`/api/hermes${path}`, {
+  const params = new URLSearchParams({ path });
+  const response = await fetch(`/api/hermes?${params.toString()}`, {
     ...init,
     headers: {
       "Content-Type": "application/json",

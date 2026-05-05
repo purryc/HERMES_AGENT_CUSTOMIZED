@@ -5,7 +5,7 @@ This is the fastest safe-ish remote access path:
 ```text
 Remote browser
   -> Vercel remote-dashboard UI
-  -> Vercel /api/hermes proxy
+  -> Vercel /api/hermes?path=... proxy
   -> Cloudflare quick tunnel
   -> local Hermes tunnel guard on 127.0.0.1:8790
   -> local Hermes Agent on 127.0.0.1:8787
@@ -66,11 +66,11 @@ If using Vercel CLI:
 cd F:\AGENT\remote-dashboard
 npm install
 npx vercel login
-npx vercel
+npx vercel --yes --prod --env "HERMES_TUNNEL_URL=<printed trycloudflare URL>" --env "REMOTE_DASHBOARD_TOKEN=<printed token>"
 ```
 
-Vercel env var entry is usually interactive. If you prefer the web UI, add the
-two variables under Project Settings -> Environment Variables and redeploy.
+Vercel env var entry is usually interactive. The command above avoids that by
+injecting the two runtime variables into the production deployment.
 
 ## Use It
 

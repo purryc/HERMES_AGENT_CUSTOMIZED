@@ -1,4 +1,5 @@
-import type { IncomingHttpHeaders } from "node:http";
+import { request as httpRequest, type IncomingHttpHeaders, type IncomingHttpHeaders as OutgoingHeaders } from "node:http";
+import { request as httpsRequest } from "node:https";
 
 type QueryValue = string | string[] | undefined;
 
@@ -55,20 +56,19 @@ function requestToken(req: VercelRequest): string {
   return match?.[1] || "";
 }
 
+function firstQueryValue(value: QueryValue): string {
+  if (Array.isArray(value)) return value[0] || "";
+  return value || "";
+}
+
 function hermesPath(req: VercelRequest): string {
-  const value = req.query.path;
-  const parts = Array.isArray(value) ? value : value ? [value] : [];
-  if (parts.length > 0) {
-    return `/${parts.map((part) => encodeURIComponent(String(part))).join("/")}`;
-  }
+  const directPath = firstQueryValue(req.query.path);
+  if (directPath) return directPath.startsWith("/") ? directPath : `/${directPath}`;
 
   if (req.url) {
-    const pathname = new URL(req.url, "https://remote-dashboard.local").pathname;
-    const match = pathname.match(/^\/api\/hermes(?:\/(.*))?$/);
-    if (match) {
-      const suffix = match[1] || "";
-      return suffix ? `/${suffix}` : "/";
-    }
+    const parsed = new URL(req.url, "https://remote-dashboard.local");
+    const queryPath = parsed.searchParams.get("path") || "";
+    if (queryPath) return queryPath.startsWith("/") ? queryPath : `/${queryPath}`;
   }
 
   return "/";
@@ -91,17 +91,15 @@ function passthroughQuery(req: VercelRequest): string {
   return query ? `?${query}` : "";
 }
 
-function requestBody(req: VercelRequest): BodyInit | undefined {
+function requestBody(req: VercelRequest): Buffer | string | undefined {
   if (req.method === "GET" || req.method === "HEAD") return undefined;
-  if (Buffer.isBuffer(req.body)) {
-    return req.body.toString("utf8");
-  }
+  if (Buffer.isBuffer(req.body)) return req.body.toString("utf8");
   if (typeof req.body === "string") return req.body;
   if (req.body === undefined || req.body === null) return undefined;
   return JSON.stringify(req.body);
 }
 
-function proxyHeaders(req: VercelRequest, token: string, body: BodyInit | undefined): HeadersInit {
+function proxyHeaders(req: VercelRequest, token: string, body: Buffer | string | undefined): Record<string, string> {
   const headers: Record<string, string> = {
     "X-Hermes-Remote-Token": token,
   };
@@ -119,6 +117,37 @@ function proxyHeaders(req: VercelRequest, token: string, body: BodyInit | undefi
     headers["Content-Length"] = String(Buffer.byteLength(body));
   }
   return headers;
+}
+
+function requestUpstream(
+  url: URL,
+  method: string,
+  headers: Record<string, string>,
+  body: Buffer | string | undefined,
+  signal: AbortSignal,
+): Promise<{ status: number; headers: OutgoingHeaders; body: Buffer }> {
+  const request = url.protocol === "https:" ? httpsRequest : httpRequest;
+
+  return new Promise((resolve, reject) => {
+    const upstreamReq = request(url, { method, headers }, (upstreamRes) => {
+      const chunks: Buffer[] = [];
+      upstreamRes.on("data", (chunk) => chunks.push(Buffer.isBuffer(chunk) ? chunk : Buffer.from(chunk)));
+      upstreamRes.on("end", () => {
+        resolve({
+          status: upstreamRes.statusCode || 502,
+          headers: upstreamRes.headers,
+          body: Buffer.concat(chunks),
+        });
+      });
+    });
+
+    const abort = () => upstreamReq.destroy(new Error("upstream_timeout"));
+    signal.addEventListener("abort", abort, { once: true });
+    upstreamReq.on("error", reject);
+    upstreamReq.on("close", () => signal.removeEventListener("abort", abort));
+    if (body !== undefined) upstreamReq.write(body);
+    upstreamReq.end();
+  });
 }
 
 function sendJson(res: VercelResponse, status: number, payload: unknown): void {
@@ -166,21 +195,22 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   const timer = setTimeout(() => controller.abort(), 45_000);
   try {
     const body = requestBody(req);
-    const upstream = await fetch(`${parsedTunnel.toString().replace(/\/+$/, "")}${path}${passthroughQuery(req)}`, {
-      method: req.method,
-      headers: proxyHeaders(req, token, body),
+    const upstreamUrl = new URL(`${parsedTunnel.toString().replace(/\/+$/, "")}${path}${passthroughQuery(req)}`);
+    const upstream = await requestUpstream(
+      upstreamUrl,
+      req.method || "GET",
+      proxyHeaders(req, token, body),
       body,
-      signal: controller.signal,
-    });
-    const responseBody = Buffer.from(await upstream.arrayBuffer());
+      controller.signal,
+    );
     res.status(upstream.status);
-    upstream.headers.forEach((value, key) => {
+    for (const [key, value] of Object.entries(upstream.headers)) {
       if (!HOP_BY_HOP_HEADERS.has(key.toLowerCase()) && key.toLowerCase() !== "content-length") {
-        res.setHeader(key, value);
+        res.setHeader(key, Array.isArray(value) ? value.join(", ") : String(value));
       }
-    });
-    res.setHeader("Content-Length", String(responseBody.length));
-    res.send(responseBody);
+    }
+    res.setHeader("Content-Length", String(upstream.body.length));
+    res.send(upstream.body);
   } catch (error) {
     const message = error instanceof Error ? error.message : String(error);
     sendJson(res, 502, { error: "tunnel_proxy_failed", detail: message });
