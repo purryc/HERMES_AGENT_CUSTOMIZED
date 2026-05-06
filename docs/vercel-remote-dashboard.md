@@ -74,6 +74,26 @@ injecting the two runtime variables into the production deployment.
 
 ## Use It
 
+### One-click local launcher
+
+Use the desktop shortcut:
+
+```text
+Hermes Remote Dashboard
+```
+
+It starts the local Hermes Dashboard, starts a protected Cloudflare tunnel,
+updates the Vercel production deployment with the current tunnel URL, copies the
+remote token to the clipboard, and opens the Vercel URL.
+
+After the page opens:
+
+1. Paste the copied token into `REMOTE TOKEN`.
+2. Click `CHECK HEALTH`.
+3. Send a message to the M5S3 companion.
+
+### Manual use
+
 1. Open the Vercel URL.
 2. Paste `REMOTE_DASHBOARD_TOKEN`.
 3. Click `Check Health`.
