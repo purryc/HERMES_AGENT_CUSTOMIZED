@@ -17,6 +17,11 @@ const TOKEN_KEY = "hermes_remote_dashboard_token";
 const DEFAULT_DEVICE_ID = "m5stick-s3-pet-01";
 const DEFAULT_SESSION_ID = "main-session";
 
+function initialToken() {
+  const hashParams = new URLSearchParams(window.location.hash.replace(/^#/, ""));
+  return hashParams.get("token") || sessionStorage.getItem(TOKEN_KEY) || "";
+}
+
 async function callHermes(path: string, token: string, init: RequestInit = {}): Promise<HermesResult> {
   const params = new URLSearchParams({ path });
   const response = await fetch(`/api/hermes?${params.toString()}`, {
@@ -41,7 +46,7 @@ async function callHermes(path: string, token: string, init: RequestInit = {}): 
 }
 
 export default function App() {
-  const [token, setToken] = useState(() => sessionStorage.getItem(TOKEN_KEY) || "");
+  const [token, setToken] = useState(initialToken);
   const [deviceId, setDeviceId] = useState(DEFAULT_DEVICE_ID);
   const [sessionId, setSessionId] = useState(DEFAULT_SESSION_ID);
   const [text, setText] = useState("");
@@ -54,6 +59,12 @@ export default function App() {
     if (token) sessionStorage.setItem(TOKEN_KEY, token);
     else sessionStorage.removeItem(TOKEN_KEY);
   }, [token]);
+
+  useEffect(() => {
+    if (window.location.hash.includes("token=")) {
+      window.history.replaceState(null, "", `${window.location.pathname}${window.location.search}`);
+    }
+  }, []);
 
   const canSend = useMemo(() => token.trim() && text.trim() && !busy, [busy, text, token]);
 

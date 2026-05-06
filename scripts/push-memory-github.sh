@@ -16,8 +16,16 @@ allowed_files=(
   "memory/mac-codex-memory.md"
   "docs/mac-codex-memory-sync.md"
   "docs/git-memory-skills-sync.md"
+  "docs/mac-agent-skill-sync.md"
+  "config/agent-skill-roots.example.txt"
+  "config/agent-skill-roots.txt"
+  "config/project-agent-roots.example.txt"
+  "config/project-agent-roots.txt"
   "specs/002-dashboard-companion-chat/plan.md"
+  "project-agents"
   "skills/shared"
+  "skills/windows-agent"
+  "skills/mac-agent"
   "skills/mac-codex"
   "scripts/export-hermes-memory.sh"
   "scripts/sync-agent-memory.ps1"
@@ -26,6 +34,7 @@ allowed_files=(
   "scripts/sync-windows-to-github.ps1"
   "scripts/install-windows-github-memory-sync-task.ps1"
   "scripts/uninstall-windows-github-memory-sync-task.ps1"
+  "scripts/collect-windows-agent-state.ps1"
   "scripts/export-mac-codex-memory.sh"
   "scripts/install-mac-codex-memory-sync.sh"
   "scripts/uninstall-mac-codex-memory-sync.sh"
@@ -35,9 +44,11 @@ allowed_files=(
   "scripts/pull-memory-github.ps1"
   "scripts/push-memory-github.sh"
   "scripts/pull-memory-github.sh"
+  "scripts/collect-mac-agent-state.sh"
   "scripts/collect-mac-codex-state.sh"
   "scripts/sync-mac-from-github.sh"
   "scripts/sync-mac-to-github.sh"
+  "scripts/sync-project-agents.sh"
 )
 
 if [ ! -d "${mirror_root}/.git" ]; then
@@ -75,6 +86,7 @@ auth.json
 *.pem
 .secrets/
 *.identity.txt
+.tmp-project-agents.*
 EOF
 
 git -C "${mirror_root}" add --all

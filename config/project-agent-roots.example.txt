@@ -1,0 +1,12 @@
+# Project roots to scan for AGENTS.md.
+# Copy this file to config/project-agent-roots.txt or create
+# config/project-agent-roots.<hostname>.txt for one machine.
+#
+# Blank lines and lines starting with # are ignored.
+# If no active roots are configured, scripts/sync-project-agents.sh scans:
+# ~/Projects, ~/Developer, ~/Code, ~/Documents, ~/Desktop, ~/Work
+
+~/Projects
+~/Developer
+~/Code
+~/Work

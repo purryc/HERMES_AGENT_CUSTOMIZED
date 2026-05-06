@@ -58,11 +58,13 @@ Invoke-RestMethod "$RemoteDashboardUrl/api/hermes?path=%2Fhealthz" -Headers @{
 } | Out-Null
 
 Set-Clipboard -Value $token
-Start-Process $RemoteDashboardUrl
+$encodedToken = [System.Uri]::EscapeDataString($token)
+Start-Process "$RemoteDashboardUrl#token=$encodedToken"
 
 Write-Host ""
 Write-Host "Hermes Remote Dashboard is ready." -ForegroundColor Green
 Write-Host "Remote URL: $RemoteDashboardUrl"
-Write-Host "Token copied to clipboard. Paste it into REMOTE TOKEN, then click CHECK HEALTH."
+Write-Host "Token copied to clipboard and injected into the page URL fragment."
+Write-Host "If the token field is filled, click CHECK HEALTH. If it is empty, press Ctrl+V in REMOTE TOKEN."
 Write-Host ""
 Read-Host "Press Enter to close this window"

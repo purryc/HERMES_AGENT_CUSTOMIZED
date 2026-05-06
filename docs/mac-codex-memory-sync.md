@@ -1,16 +1,12 @@
-# Mac Codex Memory Sync
+# Mac Memory Sync
 
-Goal: add the work Mac Codex instance to the same Hermes/Codex shared memory bridge.
+Goal: add the work Mac to the same Hermes/Codex shared memory bridge.
 
 ## Recommended Sync Layer
 
-Use a private file sync tool to keep the `AGENT/memory` folder available on both machines.
+Use the private GitHub repo as the simple sync layer for curated memory, original AGENT skills, and project `AGENTS.md` files.
 
-Recommended order:
-- Syncthing: best for private local machine-to-machine sync.
-- iCloud Drive: easiest on Mac if the Windows side can access the same folder.
-- Google Drive/Dropbox/OneDrive: acceptable if you are comfortable storing this private context there.
-- Private Git repo: not recommended for raw memory files.
+Raw memory exports still stay local-only. The GitHub repo is for curated/safe context, not auth files or raw secret-bearing state.
 
 Do not sync API keys or auth files. The scripts only export memory/context files, not `auth.json`.
 
@@ -28,6 +24,16 @@ This does three things:
 - Links `memory/SHARED_AGENT_MEMORY.md` into `~/.codex/memories/shared-agent-memory.md`.
 - Exports Mac Codex memory to `memory/mac-codex-raw-memory-export.md`.
 - Installs a LaunchAgent that refreshes the export every 30 minutes.
+
+For GitHub sync, use:
+
+```bash
+cd /path/to/hermes-memory
+./scripts/sync-mac-to-github.sh
+```
+
+That command copies original AGENT folder skills into `skills/mac-agent/<hostname>/`.
+See `docs/mac-agent-skill-sync.md` for the skill root config.
 
 ## Manual Commands
 
@@ -52,3 +58,10 @@ Uninstall:
 ## Daily Workflow
 
 Mac Codex should read `memory/SHARED_AGENT_MEMORY.md` before substantial work and update it after durable project decisions. The raw export is for recall/debugging; the curated shared memory file is the cross-agent source of truth.
+
+End of day:
+
+```bash
+cd /path/to/hermes-memory
+./scripts/sync-mac-to-github.sh
+```

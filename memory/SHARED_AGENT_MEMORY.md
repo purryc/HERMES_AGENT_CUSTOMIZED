@@ -51,6 +51,8 @@ WSL path: `/mnt/f/AGENT/memory/SHARED_AGENT_MEMORY.md`
 ## Model Routing Policy
 
 - Hermes/OpenRouter handles Telegram intake, everyday chat, reminders, memory, light planning, and coordination.
+- Hermes default model is `deepseek/deepseek-v4-flash` (low cost for daily chat).
+- **For deep financial analysis, butterfly-effect mapping, and project planning: Hermes switches to `claude-opus-4` (best version)** — this is the user's explicit preference.
 - Codex handles implementation: repositories, scripts, file edits, tests, desktop/web execution, and batch engineering work.
 - For engineering tasks, Hermes should summarize the requested change and then delegate execution to Codex instead of spending OpenRouter budget on implementation.
 - ChatGPT/Codex subscription and OpenRouter API billing are separate; do not assume ChatGPT plan credit pays OpenRouter usage.
@@ -61,6 +63,8 @@ WSL path: `/mnt/f/AGENT/memory/SHARED_AGENT_MEMORY.md`
 ## Active Projects
 
 - Hermes Agent setup and Dashboard companion work in `F:\AGENT`.
+- Vercel Remote Dashboard MVP uses `remote-dashboard/` as a Vercel root directory plus a protected Cloudflare Tunnel path back to local Hermes.
+- Remote Dashboard production alias is `https://remote-dashboard-six.vercel.app`; the Vercel proxy uses `/api/hermes?path=<url-encoded-Hermes-path>` because multi-segment catch-all routing was unreliable in production.
 - Dividend Dashboard work is expected under `F:\MyFinanceTool`.
 - Knowledge management system uses local Markdown/structured data plus Google Drive/iPad app retrieval.
 - Dividend Dashboard current target includes stock/dividend analysis, spending analysis, and scheduling/automation support.
@@ -77,6 +81,9 @@ WSL path: `/mnt/f/AGENT/memory/SHARED_AGENT_MEMORY.md`
 - Hermes built-in memories: `/root/.hermes/memories/USER.md` and `/root/.hermes/memories/MEMORY.md`
 - Hermes agent repo: `/root/.hermes/hermes-agent`
 - Dashboard URL: `http://127.0.0.1:9119`
+- Remote dashboard local subproject: `F:\AGENT\remote-dashboard`
+- Remote tunnel scripts: `F:\AGENT\scripts\start-hermes-cloudflare-tunnel.ps1` and `F:\AGENT\scripts\stop-hermes-cloudflare-tunnel.ps1`
+- Remote dashboard one-click launcher script: `F:\AGENT\scripts\start-hermes-remote-dashboard.ps1`; desktop shortcut name is `Hermes Remote Dashboard`.
 
 ## Handoff Notes
 
@@ -87,6 +94,7 @@ WSL path: `/mnt/f/AGENT/memory/SHARED_AGENT_MEMORY.md`
 - If Hermes says Codex is unavailable with OpenAI 401, prefer fixing auth bridge instead of letting OpenRouter model do a large coding job directly.
 - If Hermes blocks on project startup, inspect whether it is in WSL vs Windows path and whether dependencies were installed in the right environment.
 - If the task involves GitHub memory sync, use the `.memory-git` mirror and the allowlist scripts, not the noisy `F:\AGENT` worktree.
+- For Vercel remote dashboard work, never commit the generated remote token or `data/hermes-remote-tunnel.json`; the quick tunnel should point at the guarded local proxy, not directly at Hermes `8787`.
 
 ## Operating Routines
 
@@ -129,7 +137,13 @@ On Hermes side, the shared bridge works like this:
 - `memory/hermes-raw-memory-export.md` is local-only and can contain sensitive private context.
 - `memory/mac-codex-memory.md` is the Mac-side curated/sanitized export target that may go to GitHub.
 - `skills/shared/*` are cross-agent skills that should go to GitHub.
-- `skills/mac-codex/*` stores Mac Codex custom skill snapshots after Mac runs its end-of-day sync.
+- `skills/windows-agent/*` stores copied original AGENT folder skills from this Windows machine; default source is `F:\AGENT\.agents\skills`.
+- `skills/mac-agent/*` stores copied original AGENT folder skills from Mac after Mac runs its end-of-day sync.
+- `skills/mac-codex/*` is a legacy path from the earlier Codex-only assumption; prefer `skills/mac-agent/*` going forward.
+- `project-agents/*` stores copied project-level `AGENTS.md` files from each machine so cross-device Codex/Hermes can understand per-project instructions.
+- Mac end-of-day sync runs `scripts/collect-mac-agent-state.sh`; configure original AGENT skill roots with `config/agent-skill-roots.txt` or `config/agent-skill-roots.<hostname>.txt`.
+- Windows sync runs `scripts/collect-windows-agent-state.ps1` before pushing to GitHub; it uses the same original-AGENT-skill principle and excludes common secret files.
+- Mac end-of-day sync runs `scripts/sync-project-agents.sh`; configure scanned project roots with `config/project-agent-roots.txt` or a host-specific `config/project-agent-roots.<hostname>.txt`.
 - Never sync `auth.json`, `.env`, provider configs with keys, bot tokens, private keys, recovery codes, or one-time login codes.
 - If user asks for "all memory", clarify whether they mean curated shared memory, raw local export, or searchable long-term memory provider.
 

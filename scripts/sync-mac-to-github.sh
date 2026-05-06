@@ -7,7 +7,8 @@ workspace_root="$(cd "${script_dir}/.." && pwd)"
 cd "${workspace_root}"
 chmod +x scripts/*.sh
 ./scripts/pull-memory-github.sh
-./scripts/collect-mac-codex-state.sh
+./scripts/collect-mac-agent-state.sh
+./scripts/sync-project-agents.sh
 ./scripts/push-memory-github.sh
 
-printf '\nMac Codex memory/skills were collected and pushed to GitHub.\n'
+printf '\nMac memory, original AGENT skills, and project AGENTS.md files were collected and pushed to GitHub.\n'

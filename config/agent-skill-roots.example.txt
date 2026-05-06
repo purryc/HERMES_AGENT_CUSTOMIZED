@@ -1,0 +1,14 @@
+# Original AGENT skill roots to copy on Mac.
+# Copy this file to config/agent-skill-roots.txt or create
+# config/agent-skill-roots.<hostname>.txt for one machine.
+#
+# Blank lines and lines starting with # are ignored.
+# The sync script copies original skill folders that contain SKILL.md or
+# DESCRIPTION.md. It does not create rewritten Codex-only skill copies.
+#
+# Common examples:
+
+~/.agents/skills
+~/AGENT/.agents/skills
+~/AGENT/skills
+~/.hermes/skills
